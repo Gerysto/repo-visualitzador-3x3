@@ -1,3 +1,5 @@
+g = {};
+
 async function start() {
     let canvas = document.getElementById("c");
     let gl = canvas.getContext("webgl2");
@@ -5,6 +7,24 @@ async function start() {
         throw new Error("Failed to start WebGL!");
     }
     
+    g.program = await loadShaders(gl);
+    initialize(gl);
+}
+
+function resizeCanvasToDisplaySize(canvas) {
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = Math.floor(canvas.clientWidth * dpr);
+    const displayHeight = Math.floor(canvas.clientHeight * dpr);
+
+    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+        canvas.width = displayWidth;
+        canvas.height = displayHeight;
+        return true;
+    }
+    return false;
+}
+
+async function loadShaders(gl) {
     // Setup the program (vertex + fragment shaders)
     let vertShaderSource = await getShaderSource("shaders/shader.vert");
     let fragShaderSource = await getShaderSource("shaders/shader.frag");
@@ -14,11 +34,19 @@ async function start() {
 
     let program = createProgram(gl,vertexShader,fragmentShader);
     gl.useProgram(program);
-    // Get attribute locations:
-    let vertexLoc = gl.getAttribLocation(program, "vertex");
-    console.log("Vertex loc = " + vertexLoc);
+    
+    return program;
+}
+
+function initialize(gl) {
+    
     // Set viewport size:
-    gl.viewport(0,0,gl.canvas.width, gl.canvas.height);
+    resizeCanvasToDisplaySize(gl.canvas);
+    gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
+    console.log(gl.canvas.width, gl.canvas.height);
+    // Get attribute locations:
+    let vertexLoc = gl.getAttribLocation(g.program, "vertex");
+    console.log("Vertex loc = " + vertexLoc);
 
     // Create and fill-in the buffers
     let vertexBuffer = gl.createBuffer();
@@ -39,43 +67,4 @@ async function start() {
     // Specify how to read the data:
     gl.vertexAttribPointer(vertexLoc, 3, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-}
-
-// Returns the contents of the file in the url provided.
-async function getShaderSource(url) {
-    let contents = await fetch(url);
-    if (!contents.ok) {
-        throw new Error("Failed to read contents of: " + url);
-    }
-    let result = await contents.text();
-    return result;
-}
-
-function createShader(gl, type, source) {
-    var shader = gl.createShader(type);
-    gl.shaderSource(shader,source);
-    gl.compileShader(shader);
-    var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (success) {
-        return shader;
-    }
-    console.log(source);
-    console.log(gl.getShaderInfoLog(shader));
-    gl.deleteShader(shader);
-    throw new Error("Failed to create Shader: " + source);
-}
-
-
-function createProgram(gl, vertexShader, fragmentShader) {
-    var program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    var success = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (success) {
-        return program;
-    }
-    console.log(gl.getProgramInfoLog(program));
-    gl.deleteProgram(program);
-    throw new Error("Failed to create Program!");
 }
