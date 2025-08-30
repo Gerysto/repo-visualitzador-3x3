@@ -12,5 +12,8 @@ in float f_matshin;
 out vec4 FragColor;
 
 void main() {
-    FragColor = vec4(f_matdiff,1.0);
+
+
+    vec3 sum = f_vertex + f_normal + f_matamb + f_matdiff + f_matspec;
+    FragColor = vec4(f_matdiff + 0.01*sum*f_matshin,1.0);
 }

@@ -11,7 +11,8 @@ async function start() {
     initialize(gl);
 }
 
-function resizeCanvasToDisplaySize(canvas) {
+function resizeCanvasToDisplaySize(gl) {
+    const canvas = gl.canvas;
     const dpr = window.devicePixelRatio || 1;
     const displayWidth = Math.floor(canvas.clientWidth * dpr);
     const displayHeight = Math.floor(canvas.clientHeight * dpr);
@@ -45,7 +46,7 @@ async function loadShaders(gl) {
 function initialize(gl) {
     
     // Set viewport size:
-    resizeCanvasToDisplaySize(gl.canvas);
+    resizeCanvasToDisplaySize(gl);
     gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
     console.log(gl.canvas.width, gl.canvas.height);
 
@@ -56,11 +57,18 @@ function initialize(gl) {
     g.matdiffLoc = gl.getAttribLocation(g.program, "matdiff");
     g.matspecLoc = gl.getAttribLocation(g.program, "matspec");
     g.matshinLoc = gl.getAttribLocation(g.program, "matshin");
-
     g.TGLoc = gl.getUniformLocation(g.program, "TG");
     g.VMLoc = gl.getUniformLocation(g.program, "VM");
     g.PMLoc = gl.getUniformLocation(g.program, "PM");
     g.NMLoc = gl.getUniformLocation(g.program, "NM"); // normal matrix
+
+    console.log("Attribute vertexLoc = "+   g.vertexLoc);
+    console.log("Attribute normalLoc = "+ g.normalLoc);
+    console.log("Attribute matambLoc = "+  g.matambLoc);
+    console.log("Attribute matdiffLoc = "+ g.matdiffLoc);
+    console.log("Attribute matspecLoc = "+ g.matspecLoc);
+    console.log("Attribute matshinLoc = "+ g.matshinLoc);
+
 
     // set up the VAO and store model data in g
     const url = "Patricio.obj";
@@ -123,6 +131,7 @@ function modelTransform(gl, model_data) {
     model_data.TG.setUniform(gl, g.TGLoc, false);
 
     // Normal Matrix:
+    model_data.NM = new J3DIMatrix4();
     model_data.NM.load(g.VM);
     model_data.NM.multiply(model_data.TG);
     model_data.NM.transpose();
@@ -145,9 +154,9 @@ function storeBoundingBoxData(m) {
         maxY = Math.max(maxY, m.vertices[i+1]);
         maxZ = Math.max(maxZ, m.vertices[i+2]);
     }
-    g.height = maxY - minY;
+    m.height = maxY - minY;
 
-    g.boundinBox = {
+    m.boundinBox = {
         minX: minX,
         minY: minY,
         minZ: minZ,
@@ -155,12 +164,12 @@ function storeBoundingBoxData(m) {
         maxY: maxY,
         maxZ: maxZ
     };
-    g.center = {
+    m.center = {
         x: (minX+maxX)/2.0,
         y: (minY+maxY)/2.0,
         z: (minZ+maxZ)/2.0
     };
-    g.baseCenter = {
+    m.baseCenter = {
         x: (minX+maxX)/2.0,
         y: minY,
         z: (minZ+maxZ)/2.0

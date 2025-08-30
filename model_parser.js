@@ -1,16 +1,16 @@
 class Material {
     constructor(Ka, Kd, Ks, Ns) {
-        this.Ka = Ka;
-        this.Kd = Kd;
-        this.Ks = Ks;
-        this.Ns = Ns;
+        this.Ka = Ka; // Ambient
+        this.Kd = Kd; // Diffuse
+        this.Ks = Ks; // Specular
+        this.Ns = Ns; // Shininess
     };
 }
 
 class Face {
     constructor(v, n, m) {
-        this.vertices = v;
-        this.normals = n;
+        this.v = v; // Vertices
+        this.n = n; // Normals
         this.material = m;
     };
 }
@@ -205,7 +205,7 @@ class Model {
             }
             v = [f.v[0], f.v[2], parseInt(aux[0])-1];
             // textures are not implemented yet!
-            n = [f.n[0], f.n[2], parseInt(aux[2])-1]
+            n = [f.n[0], f.n[2], parseInt(aux[2])-1];
             f = new Face(v,n,curr_mtl);
             this.faces.push(f);
             ++i;
