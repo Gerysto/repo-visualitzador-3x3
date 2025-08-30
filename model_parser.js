@@ -272,5 +272,116 @@ class Model {
         console.log("Finished storing materials!");
         console.log(this.materials);
     }
+
+    get_VBO_vertices() {
+        let vertices = new Float32Array(3*3*this.faces.length);
+        for (let i = 0; i < this.faces.length; ++i) {
+            let v0 = this.faces[i].v[0];
+            let v1 = this.faces[i].v[1];
+            let v2 = this.faces[i].v[2];
+
+            vertices[9*i  ] = this.vertices[3*v0  ];
+            vertices[9*i+1] = this.vertices[3*v0+1];
+            vertices[9*i+2] = this.vertices[3*v0+2];
+            vertices[9*i+3] = this.vertices[3*v1  ];
+            vertices[9*i+4] = this.vertices[3*v1+1];
+            vertices[9*i+5] = this.vertices[3*v1+2];
+            vertices[9*i+6] = this.vertices[3*v2  ];
+            vertices[9*i+7] = this.vertices[3*v2+1];
+            vertices[9*i+8] = this.vertices[3*v2+2];
+        }
+        return vertices;
+    }
+
+    get_VBO_normals() {
+        let normals = new Float32Array(3*3*this.faces.length);
+        for (let i = 0; i < this.faces.length; ++i) {
+            let n0 = this.faces[i].n[0];
+            let n1 = this.faces[i].n[1];
+            let n2 = this.faces[i].n[2];
+
+            normals[9*i  ] = this.normals[3*n0  ];
+            normals[9*i+1] = this.normals[3*n0+1];
+            normals[9*i+2] = this.normals[3*n0+2];
+            normals[9*i+3] = this.normals[3*n1  ];
+            normals[9*i+4] = this.normals[3*n1+1];
+            normals[9*i+5] = this.normals[3*n1+2];
+            normals[9*i+6] = this.normals[3*n2  ];
+            normals[9*i+7] = this.normals[3*n2+1];
+            normals[9*i+8] = this.normals[3*n2+2];
+        }
+        return normals;
+    }
+
+    get_VBO_matamb() {
+        console.log(this.faces);
+        let matamb = new Float32Array(3*3*this.faces.length);
+        for (let i = 0; i < this.faces.length; ++i) {
+            let mat = this.faces[i].material;
+            let Ka = this.materials.get(mat).Ka;
+            
+            matamb[9*i  ] = Ka[0];
+            matamb[9*i+1] = Ka[1];
+            matamb[9*i+2] = Ka[2];
+            matamb[9*i+3] = Ka[0];
+            matamb[9*i+4] = Ka[1];
+            matamb[9*i+5] = Ka[2];
+            matamb[9*i+6] = Ka[0];
+            matamb[9*i+7] = Ka[1];
+            matamb[9*i+8] = Ka[2];
+        }
+        return matamb;
+    }
+
+    get_VBO_matdiff() {
+        let matdiff = new Float32Array(3*3*this.faces.length);
+        for (let i = 0; i < this.faces.length; ++i) {
+            let mat = this.faces[i].material;
+            let Kd = this.materials.get(mat).Kd;
+            
+            matdiff[9*i  ] = Kd[0];
+            matdiff[9*i+1] = Kd[1];
+            matdiff[9*i+2] = Kd[2];
+            matdiff[9*i+3] = Kd[0];
+            matdiff[9*i+4] = Kd[1];
+            matdiff[9*i+5] = Kd[2];
+            matdiff[9*i+6] = Kd[0];
+            matdiff[9*i+7] = Kd[1];
+            matdiff[9*i+8] = Kd[2];
+        }
+        return matdiff;
+    }
+
+    get_VBO_matspec() {
+        let matspec = new Float32Array(3*3*this.faces.length);
+        for (let i = 0; i < this.faces.length; ++i) {
+            let mat = this.faces[i].material;
+            let Ks = this.materials.get(mat).Ks;
+            
+            matspec[9*i  ] = Ks[0];
+            matspec[9*i+1] = Ks[1];
+            matspec[9*i+2] = Ks[2];
+            matspec[9*i+3] = Ks[0];
+            matspec[9*i+4] = Ks[1];
+            matspec[9*i+5] = Ks[2];
+            matspec[9*i+6] = Ks[0];
+            matspec[9*i+7] = Ks[1];
+            matspec[9*i+8] = Ks[2];
+        }
+        return matspec;
+    }
+
+    get_VBO_matshin() {
+        let matshin = new Float32Array(3*this.faces.length);
+        for (let i = 0; i < this.faces.length; ++i) {
+            let mat = this.faces[i].material;
+            let Ns = this.materials.get(mat).Ns;
+            
+            matshin[3*i  ] = Ns;
+            matshin[3*i+1] = Ns;
+            matshin[3*i+2] = Ns;
+        }
+        return matshin;
+    }
 }
 
