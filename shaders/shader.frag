@@ -12,5 +12,5 @@ in float f_matshin;
 out vec4 FragColor;
 
 void main() {
-    FragColor = vec4(f_color,1);
+    FragColor = vec4(f_matdiff,1.0);
 }

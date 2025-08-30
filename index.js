@@ -65,7 +65,7 @@ function initialize(gl) {
     // set up the VAO and store model data in g
     const url = "Patricio.obj";
     let model_data = {};
-    createBuffersModel(model_data, url);
+    createBuffersModel(gl, model_data, url);
     storeBoundingBoxData(model_data);
 
 
@@ -136,7 +136,7 @@ function storeBoundingBoxData(m) {
     minX = minY = minZ = 1e100;
     maxX = maxY = maxZ = -1e100;
 
-    for (let i = 0; i < vertices.length; i+=3) {
+    for (let i = 0; i < m.vertices.length; i+=3) {
         minX = Math.min(minX, m.vertices[i]);
         minY = Math.min(minY, m.vertices[i+1]);
         minZ = Math.min(minZ, m.vertices[i+2]);
@@ -169,7 +169,7 @@ function storeBoundingBoxData(m) {
 
 // Creates and fills the requiered Web-GL buffers to render the model.
 // Returns the model's VAO (vertex array object)
-function createbuffersModel(m, url) {
+function createBuffersModel(gl, m, url) {
     vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
 
@@ -188,8 +188,8 @@ function createbuffersModel(m, url) {
     let vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(m.vertices), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(vertexLoc);
-    gl.vertexAttribPointer(vertexLoc, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(g.vertexLoc);
+    gl.vertexAttribPointer(g.vertexLoc, 3, gl.FLOAT, false, 0, 0);
     
     // Normals buffer: 
     let normalBuffer = gl.createBuffer();
@@ -207,7 +207,7 @@ function createbuffersModel(m, url) {
         
     // Diffuse material parameter buffer: 
     let matdiffBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, matdiffbuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, matdiffBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(m.matdiff), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(g.matdiffLoc);
     gl.vertexAttribPointer(g.matdiffLoc, 3, gl.FLOAT, false, 0, 0);

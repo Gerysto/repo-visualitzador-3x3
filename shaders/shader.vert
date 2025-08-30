@@ -20,12 +20,13 @@ uniform mat4 PM;
 uniform mat4 NM;
 
 void main() {
-    f_vertex = VM*TG*vec4(vertex, 1.0);
-    f_normal = vec3(NM*vec4(normal, 1.0));
+    vec4 v = VM*TG*vec4(vertex, 1.0);
+    f_vertex = v.xyz;
+    f_normal = (NM*vec4(normal, 1.0)).xyz;
     f_matamb = matamb;
     f_matdiff = matdiff;
     f_matspec = matspec;
     f_matshin = matshin;
 
-    gl_Position = vec4(vertex, 1.0);
+    gl_Position = PM*v;
 }
