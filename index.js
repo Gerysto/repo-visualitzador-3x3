@@ -8,7 +8,7 @@ async function start() {
     }
     
     g.program = await loadShaders(gl);
-    initialize(gl);
+    await initialize(gl);
 }
 
 function resizeCanvasToDisplaySize(gl) {
@@ -43,9 +43,12 @@ async function loadShaders(gl) {
     return program;
 }
 
-function initialize(gl) {
+async function initialize(gl) {
     
     // Set viewport size:
+    gl.clearColor(0.8, 0.8, 0.8, 1.0); // light gray background
+    gl.enable(gl.DEPTH_TEST);
+
     resizeCanvasToDisplaySize(gl);
     gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
     console.log(gl.canvas.width, gl.canvas.height);
@@ -73,7 +76,7 @@ function initialize(gl) {
     // set up the VAO and store model data in g
     const url = "Patricio.obj";
     let model_data = {};
-    createBuffersModel(gl, model_data, url);
+    await createBuffersModel(gl, model_data, url);
     storeBoundingBoxData(model_data);
 
 
@@ -178,13 +181,13 @@ function storeBoundingBoxData(m) {
 
 // Creates and fills the requiered Web-GL buffers to render the model.
 // Returns the model's VAO (vertex array object)
-function createBuffersModel(gl, m, url) {
+async function createBuffersModel(gl, m, url) {
     vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
 
     model = new Model();
 
-    model.load(url);
+    await model.load(url);
     // Create and fill-in the buffers
     m.vertices = model.get_VBO_vertices();
     m.normals = model.get_VBO_normals();
