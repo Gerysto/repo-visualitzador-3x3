@@ -1,7 +1,8 @@
 g = {};
 
+let canvas;
 async function start() {
-    let canvas = document.getElementById("c");
+    canvas = document.getElementById("c");
     let gl = canvas.getContext("webgl2");
     if (!gl) {
         throw new Error("Failed to start WebGL!");
@@ -9,6 +10,10 @@ async function start() {
     
     g.program = await loadShaders(gl);
     await initialize(gl);
+
+    document.addEventListener("mousemove", MouseMoveHandler, false);
+    document.addEventListener("mousedown", MouseDownHandler, false);
+    document.addEventListener("mouseup", MouseUpHandler, false)
 }
 
 function resizeCanvasToDisplaySize(gl) {
@@ -65,12 +70,12 @@ async function initialize(gl) {
     g.PMLoc = gl.getUniformLocation(g.program, "PM");
     g.NMLoc = gl.getUniformLocation(g.program, "NM"); // normal matrix
 
-    console.log("Attribute vertexLoc = "+   g.vertexLoc);
-    console.log("Attribute normalLoc = "+ g.normalLoc);
-    console.log("Attribute matambLoc = "+  g.matambLoc);
-    console.log("Attribute matdiffLoc = "+ g.matdiffLoc);
-    console.log("Attribute matspecLoc = "+ g.matspecLoc);
-    console.log("Attribute matshinLoc = "+ g.matshinLoc);
+    console.log("Attribute vertexLoc = " +   g.vertexLoc);
+    console.log("Attribute normalLoc = " + g.normalLoc);
+    console.log("Attribute matambLoc = " +  g.matambLoc);
+    console.log("Attribute matdiffLoc = " + g.matdiffLoc);
+    console.log("Attribute matspecLoc = " + g.matspecLoc);
+    console.log("Attribute matshinLoc = " + g.matshinLoc);
 
 
     // set up the VAO and store model data in g
@@ -79,11 +84,24 @@ async function initialize(gl) {
     await createBuffersModel(gl, model_data, url);
     storeBoundingBoxData(model_data);
 
+    g.angleX = 0;
+    g.angleY = 0;
+    g.mouseX = 0;
+    g.mouseY = 0;
+    g.mouse_pressed = false;
 
-    projectTransform(gl);
-    viewTransform(gl);
+    loop(gl, model_data);
+}
 
-    drawModel(gl, model_data);
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+async function loop(gl, model_data) {
+    while(true) {
+        projectTransform(gl);
+        viewTransform(gl);
+        drawModel(gl, model_data);
+        await delay(50);
+    }
 }
 
 function drawModel(gl, model_data) {
@@ -107,10 +125,32 @@ function projectTransform(gl) {
     g.PM.setUniform(gl, g.PMLoc, false);
 }
 
+function MouseDownHandler() {
+    g.mouse_pressed = true;
+}
+
+function MouseUpHandler() {
+    g.mouse_pressed = false;
+}
+
+function MouseMoveHandler(event) {
+    new_X = event.clientX - canvas.offsetLeft;
+    new_Y = event.clientY - canvas.offsetTop;
+
+    if (g.mouse_pressed) {
+        g.angleY += -(new_X-g.mouseX);
+        g.angleX +=  (new_Y-g.mouseY);
+        console.log("Mouse pressed!!");
+    }
+
+    g.mouseX = new_X;
+    g.mouseY = new_Y;
+}
+
 function viewTransform(gl) {
     const d = 20;
-    const angleX = 30.0;
-    const angleY = 0.0;
+    let angleX = g.angleX;
+    let angleY = g.angleY;
     const angleZ = 0.0;
 
     // Using Euler angles: 
