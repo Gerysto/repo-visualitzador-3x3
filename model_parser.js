@@ -214,7 +214,7 @@ class Model {
 
     async loadMaterials(mtl_url) {
         // Fetch .mtl file
-        const response = await fetch(mtl_url);
+        const response = await fetch("objects/" + mtl_url);
         if (!response.ok) {
             throw new Error('Failed to fetch from url: ' + mtl_url);
         }
@@ -269,8 +269,8 @@ class Model {
             let mat = new Material(Ka, Kd, Ks, Ns);
             this.materials.set(curr_mtl, mat);
         }
-        console.log("Finished storing materials!");
-        console.log(this.materials);
+        //console.log("Finished storing materials!");
+        //console.log(this.materials);
     }
 
     get_VBO_vertices() {
@@ -314,7 +314,7 @@ class Model {
     }
 
     get_VBO_matamb() {
-        console.log(this.faces);
+        //console.log(this.faces);
         let matamb = new Float32Array(3*3*this.faces.length);
         for (let i = 0; i < this.faces.length; ++i) {
             let mat = this.faces[i].material;

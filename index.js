@@ -1,5 +1,9 @@
 g = {};
-const model_url = "Patrick.obj";
+const model_url = "objects/c0.obj";
+
+corner_models = [];
+edge_models = [];
+center_models = [];
 
 async function start() {
     g.htmlcanvas = document.getElementById("c");
@@ -77,11 +81,36 @@ async function initialize(gl) {
    //console.log("Attribute matspecLoc = " + g.matspecLoc);
    //console.log("Attribute matshinLoc = " + g.matshinLoc);
 
+    for (let i = 0; i < 8; ++i) {    
+        let model_data = {};
+        let url = "objects/c" + i.toString() + ".obj";
+        await createBuffersModel(gl, model_data, url);
+        storeBoundingBoxData(model_data);
+        
+        modelTransform(gl, model_data, corner_TG[i]);
+        console.log(corner_TG[i]);
+        corner_models.push(model_data);
+    }
 
+    for (let i = 0; i < 12; ++i) {    
+        let model_data = {};
+        let url = "objects/e" + i.toString() + ".obj";
+        await createBuffersModel(gl, model_data, url);
+        storeBoundingBoxData(model_data);
+        modelTransform(gl, model_data, edge_TG[i]);
+        edge_models.push(model_data);
+    }
+
+    for (let i = 0; i < 6; ++i) {    
+        let model_data = {};
+        let url = "objects/f" + i.toString() + ".obj";
+        await createBuffersModel(gl, model_data, url);
+        storeBoundingBoxData(model_data);
+        modelTransform(gl, model_data, center_TG[i]);
+        center_models.push(model_data);
+    }
     // set up the VAO and store model data in g
-    let model_data = {};
-    await createBuffersModel(gl, model_data, model_url);
-    storeBoundingBoxData(model_data);
+
 
     g.angleX = 0;
     g.angleY = 0;
@@ -89,23 +118,35 @@ async function initialize(gl) {
     g.mouseY = 0;
     g.mouse_pressed = false;
 
-    loop(gl, model_data);
+    loop(gl);
 }
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-async function loop(gl, model_data) {
+async function loop(gl) {
     while(true) {
         projectTransform(gl);
         viewTransform(gl);
-        drawModel(gl, model_data);
+            
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        for (m of corner_models) { drawModel(gl, m); } 
+        for (m of edge_models)   { drawModel(gl, m); }
+        for (m of center_models) { drawModel(gl, m); }
+
         await delay(50);
     }
 }
 
 function drawModel(gl, model_data) {
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    modelTransform(gl, model_data);
+    //modelTransform(gl, model_data);
+    console.log(model_data.TG);
+    const m = new J3DIMatrix4(); 
+    m.scale(0.7);
+    m.multiply(model_data.TG);
+    m.scale(0.99); // <---------------- Separa una mica les peces
+    
+    //model_data.TG.setUniform(gl, g.TGLoc, false);
+    m.setUniform(gl, g.TGLoc, false);
     gl.bindVertexArray(model_data.vao);
     gl.drawArrays(gl.TRIANGLES, 0, model_data.vertices.length/3);
 }
@@ -161,14 +202,15 @@ function viewTransform(gl) {
     g.VM.setUniform(gl, g.VMLoc, false);
 }
 
-function modelTransform(gl, model_data) {
-    let scale_factor = 5.0/model_data.height;
-    let x_trans = -model_data.center.x;
-    let y_trans = -model_data.center.y;
-    let z_trans = -model_data.center.z;
+function modelTransform(gl, model_data, transform) {
+    let scale_factor = 3.0/model_data.height;
+    //let x_trans = -model_data.center.x;
+    //let y_trans = -model_data.center.y;
+    //let z_trans = -model_data.center.z;
     model_data.TG = new J3DIMatrix4();
     model_data.TG.scale(scale_factor, scale_factor, scale_factor);
-    model_data.TG.translate(x_trans, y_trans, z_trans);
+    model_data.TG.multiply(transform);
+    //model_data.TG.translate(x_trans, y_trans, z_trans);
     model_data.TG.setUniform(gl, g.TGLoc, false);
 
     // Normal Matrix:
