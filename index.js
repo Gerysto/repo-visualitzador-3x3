@@ -132,24 +132,33 @@ async function loop(gl) {
         for (m of corner_models) { drawModel(gl, m); } 
         for (m of edge_models)   { drawModel(gl, m); }
         for (m of center_models) { drawModel(gl, m); }
-
+        
         await delay(50);
     }
 }
 
 function drawModel(gl, model_data) {
-    //modelTransform(gl, model_data);
-    console.log(model_data.TG);
-    const m = new J3DIMatrix4(); 
-    m.scale(0.7);
-    m.multiply(model_data.TG);
-    m.scale(0.99); // <---------------- Separa una mica les peces
-    
-    //model_data.TG.setUniform(gl, g.TGLoc, false);
-    m.setUniform(gl, g.TGLoc, false);
+
+    // Separate pieces from one another 
+    // (TODO: Make this less ugly!)
+    const M = new J3DIMatrix4();
+    M.scale(0.7);
+    M.multiply(model_data.TG);
+    M.scale(0.99);
+
+    M.setUniform(gl, g.TGLoc, false);
+
+    const NM = new J3DIMatrix4();
+    NM.load(g.VM);      // View
+    NM.multiply(M);     // View * Model
+    NM.invert();
+    NM.transpose();
+    NM.setUniform(gl, g.NMLoc, false);
+
     gl.bindVertexArray(model_data.vao);
-    gl.drawArrays(gl.TRIANGLES, 0, model_data.vertices.length/3);
+    gl.drawArrays(gl.TRIANGLES, 0, model_data.vertices.length / 3);
 }
+
 
 function projectTransform(gl) {
     let canvas = document.getElementById("c");
@@ -212,14 +221,6 @@ function modelTransform(gl, model_data, transform) {
     model_data.TG.multiply(transform);
     //model_data.TG.translate(x_trans, y_trans, z_trans);
     model_data.TG.setUniform(gl, g.TGLoc, false);
-
-    // Normal Matrix:
-    model_data.NM = new J3DIMatrix4();
-    model_data.NM.load(g.VM);
-    model_data.NM.multiply(model_data.TG);
-    model_data.NM.transpose();
-    model_data.NM.invert();
-    model_data.NM.setUniform(gl, g.NMLoc, false);
 }
 
 // Stores the bounding box, height, center and baseCenter in m

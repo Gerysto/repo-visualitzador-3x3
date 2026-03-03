@@ -31,7 +31,7 @@ vec3 specular(vec3 L, vec3 vertexSCO) {
 void main() {
 
     vec3 col, L, n;
-    n = normalize(-normalSCO);
+    n = normalize(normalSCO);
     L = normalize(lightPos - vertexSCO.xyz);
 
     col += ambient();
